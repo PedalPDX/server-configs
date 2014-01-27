@@ -1,15 +1,19 @@
 Installing and configuring Icescrum
 ===================================
 
-Installing the Pacakges
------------------------
+Setup
+-----
+
+Install The necessary packages.
 
 ```sh
 sudo apt-get update
 sudo apt-get install openjdk-7-jre unzip tomcat7 tomcat7-admin
 ```
 
-Configuring Tomcat
+
+
+Configure Tomcat
 ----------------
 
 Give the `tomcat7` user the ownership of its respective directories
@@ -19,21 +23,24 @@ chown -R tomcat7:root /var/lib/tomcat7
 chown -R tomcat7:root /usr/share/tomcat7
 ```
 
-Add The following two Lines to `/etc/tomcat7/tomcat-users.xml`
+
+Add The following lines to `/etc/tomcat7/tomcat-users.xml` so that you may log into the tomcat
+webapp manager
 
 ```sh
   <role rolename="manager-gui"/>
   <user username="tomcat" password="SomePass" roles="admin-gui"/>
 ```
 
-go to /var/lib/tomcat7/conf/ and edit `server.xml`. replace the line:
+
+Edit `/var/lib/tomcat7/conf/server.xml` to include the NIO protocol by replacing the Connector stanza:
 ```sh
 <Connector port="8080" protocol="HTTP/1.1"
            connectionTimeout="20000"
            URIEncoding="UTF-8"
            redirectPort="8443" />
 ```
-with the line: 
+with these lines:
 ```sh
     <Connector port="8080" protocol="org.apache.coyote.http11.Http11NioProtocol"
            connectionTimeout="20000"
@@ -41,30 +48,39 @@ with the line:
            redirectPort="8443" />
 ```
 
+Excellent, that should be enough fiddling with tomcat. 
+
+
+
 Prepping for Icescrum
 ---------------------
 
-we also need to add the following line to the top of `/usr/share/tomcat7/bin/catalina.sh`
+Add the following line to the top of `/usr/share/tomcat7/bin/catalina.sh`
 
 ```sh
 CATALINA_OPTS="-Dicescrum.log.dir=/home/icescrum/ -Duser.timezone=UTC -Dicescrum_config_location=/home/icescrum/config.groovy -Xmx512m -XX:MaxPermSize=256m"
 ```
 
-lets now make a homedir for icescrum, so it has a place to organize its files
+
+Make a homedir for icescrum, so it has a place to organize its files and remember to grant `tomcat7` ownership.
 
 ```sh
 mkdir -p /home/icescrum
 chown tomcat7:root /home/icescrum
 ```
 
-We also want to use the postgres JDBC plugin for talking to the postgres server.
+
+To use Postgres with Icescrum, Download and install the JDBC plugin for talking to the postgres database.
 
 ```sh
 wget http://jdbc.postgresql.org/download/postgresql-9.3-1100.jdbc4.jar
 cp ./postgres-9.3-1100.jdbc4.jar /usr/share/tomcat7/lib/
+chown tomcat7:root /usr/share/tomcat7/lib/postgresql-9.3-1100.jdbc4.jar
 ```
 
-And Assuming weve already got the postgres database up, lets make our user
+
+Assuming the postgres database is installed, make the icescrum database and user.
+
 ```sh
 su - postgres
 psql
@@ -73,8 +89,14 @@ CREAT DATABASE icescrum;
 GRANT ALL PRIVILEGES ON DATABASE icescrum TO icescrum;
 ```
 
-no lets add our configuration to the `config.groovy` file in the icescrum homedir
+
+Add the following configuration to the `config.groovy` file in the icescrum homedir.
+make sure to edit in the appropriate credentials and emails where necessary.
 ```sh
+touch /home/icescrum/config.groovy
+chown tomcat7:root /home/icescrum/config.groovy
+cat << EOF > /home/icescrum/config.groovy
+
 icescrum.project.import.enable = true
 icescrum.project.export.enable = true
 icescrum.project.creation.enable = true
@@ -92,7 +114,7 @@ icescrum.auto_follow_scrummaster  = true
 icescrum.alerts.errors.to = "some@email"
 icescrum.alerts.subject_prefix = "[icescrum]"
 icescrum.alerts.enable = true
-icescrum.alerts.default.from = "some@email
+icescrum.alerts.default.from = "some@email"
 
 icescrum.attachments.enable = true
 
@@ -108,7 +130,7 @@ icescrum.baseDir = "/home/icescrum"
                       (not webapps!!). Path must use '/' (forward slash) */
 
 icescrum.cors.enable = true  /* CORS is enabled by default
-                                However, it's enabled only for projects 
+                                However, its enabled only for projects 
                                 where web services are enabled */
 icescrum.cors.allow.origin.regex = "*"  /* Use double backslash for escaping
                                            e.g. (http://|.+\\.)mydomain\\.com */
@@ -118,9 +140,14 @@ dataSource.driverClassName = "org.postgresql.Driver"
 dataSource.url = "jdbc:postgresql://localhost:5432/icescrum"
 dataSource.username = "icescrum"
 dataSource.password = "somePass"
+
+EOF
 ```
 
-We have to download and place the Icescrum.war file in the webapps folder of tomcat7
+Install
+-------
+
+Download and place the Icescrum.war file in the `/var/lib/tomcat7/webapps`
 
 ```sh
 wget http://www.icescrum.org/downloads/icescrum_R6_12.1_war.zip
@@ -128,7 +155,10 @@ unzip ./icescrum_R6_12.1_war.zip
 cp ./icescrum*.war /var/lib/tomcat7/webapps/
 ```
 
+Restart tomcat and navigate to `http://hostname:8080` and proceed to the app-manager to check the status of Icescrum
 
+`servive tomcat7 restart`
 
-restart tomcat and navigate to `http://hostname:8080` and proceed to the app-manager to check the status of Icescrum
+I suggest using `tail -F /home/icescrum/icescrum.log` to watch for errors.
+
 
