@@ -39,7 +39,7 @@ host    all         all         131.252.0.0/16        md5
 host    all         all         2610:10::/32          md5
 ```
 
-and then edit *** to allow outside connections
+and then edit `/etc/postgresql/9.3/main/postgresql.conf` to allow outside connections
 
 ```sh
 listen_addresses = '*'
