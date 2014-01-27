@@ -26,11 +26,26 @@ su - postgres
 createuser -d pitstop -P
 psql -c "CREATE DATABASE pedals;"
 psql -c "GRANT ALL PRIVILEGES ON DATABASE pedals TO pitstop;"
+psql -c "GRANT ALL PRIVILEGES ON DATABASE pedals TO pitstop;"
+```
 
+edit `/etc/postgresql/9.3/main/pg_hba.conf` to include the correct domain
+
+```sh
+# IPv4 local connections:
+host    all         all         131.252.0.0/16        md5
+
+# IPv6 local connections:
+host    all         all         2610:10::/32          md5
+```
+
+and then edit *** to allow outside connections
+
+```sh
+listen_addresses = '*'
 ```
 
 
 TODO:
 installing Postgis
-Sharing the datbase to users on a network
 
