@@ -1,6 +1,5 @@
-stalling and configuring Icescrum
+Installing and configuring Icescrum
 ===================================
-
 
 Installing the Pacakges
 -----------------------
@@ -23,7 +22,7 @@ chown -R tomcat7:root /usr/share/tomcat7
 Add The following two Lines to `/etc/tomcat7/tomcat-users.xml`
 
 ```sh
-  <role rolename="admin-gui"/>
+  <role rolename="manager-gui"/>
   <user username="tomcat" password="SomePass" roles="admin-gui"/>
 ```
 
@@ -41,6 +40,9 @@ with the line:
            URIEncoding="UTF-8"
            redirectPort="8443" />
 ```
+
+Prepping for Icescrum
+---------------------
 
 we also need to add the following line to the top of `/usr/share/tomcat7/bin/catalina.sh`
 
@@ -62,4 +64,6 @@ wget http://www.icescrum.org/downloads/icescrum_R6_12.1_war.zip
 unzip ./icescrum_R6_12.1_war.zip
 cp ./icescrum*.war /var/lib/tomcat7/webapps/
 ```
+
+restart tomcat and navigate to `http://hostname:8080` and proceed to the app-manager to check the status of Icescrum
 

@@ -26,7 +26,7 @@ su - postgres
 createuser -d pitstop -P
 psql -c "CREATE DATABASE pedals;"
 psql -c "GRANT ALL PRIVILEGES ON DATABASE pedals TO pitstop;"
-psql -c "GRANT ALL PRIVILEGES ON DATABASE pedals TO pitstop;"
+psql -c "CREATE EXTENSION postgis;"
 ```
 
 edit `/etc/postgresql/9.3/main/pg_hba.conf` to include the correct domain
@@ -44,8 +44,3 @@ and then edit *** to allow outside connections
 ```sh
 listen_addresses = '*'
 ```
-
-
-TODO:
-installing Postgis
-
